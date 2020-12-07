@@ -1,0 +1,8 @@
+/.vscode
+/obj
+/inputs
+/src/inputs
+/aoc.elf
+/aoc.nds
+/nds.map
+.directory
