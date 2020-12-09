@@ -1,0 +1,22 @@
+#include "sol.hpp"
+#include "../common.hpp"
+
+#include <algorithm>
+#include <bitset>
+#include <memory>
+#include <assert.h>
+#include <string.h>
+#include <stdio.h>
+
+bool solveDay_(std::string_view input, AnswerBuffer& ans) {
+	int part1Ans = 0;
+	int part2Ans = 0;
+	while (!input.empty()) {
+		std::string_view line = takeCharsUntil(input, "\n");
+		if (line.empty()) continue;
+		
+	}
+	
+	ans.answerWithInts(part1Ans, part2Ans);
+	return true;
+}

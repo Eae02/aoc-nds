@@ -17,6 +17,8 @@ bool solveDay4(std::string_view input, AnswerBuffer& ans);
 bool solveDay5(std::string_view input, AnswerBuffer& ans);
 bool solveDay6(std::string_view input, AnswerBuffer& ans);
 bool solveDay7(std::string_view input, AnswerBuffer& ans);
+bool solveDay8(std::string_view input, AnswerBuffer& ans);
+bool solveDay9(std::string_view input, AnswerBuffer& ans);
 
 Solution solutions[25] = {
 	&solveDay1,
@@ -25,7 +27,9 @@ Solution solutions[25] = {
 	&solveDay4,
 	&solveDay5,
 	&solveDay6,
-	&solveDay7
+	&solveDay7,
+	&solveDay8,
+	&solveDay9
 };
 
 void runSolution(int day, ReadInputCallback readInput) {
@@ -35,8 +39,10 @@ void runSolution(int day, ReadInputCallback readInput) {
 	}
 	
 	std::string_view input = readInput(day);
-	if (input.empty())
+	if (input.empty()) {
+		printf("input for day %d is not available\n", day);
 		return;
+	}
 	
 	printf("solving day %d..", day);
 	AnswerBuffer ans;

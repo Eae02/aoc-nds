@@ -15,6 +15,6 @@ using Solution = bool(*)(std::string_view input, AnswerBuffer& ans);
 
 extern Solution solutions[25];
 
-constexpr int MAX_DAY_IMPLEMETED = 7;
+constexpr int MAX_DAY_IMPLEMETED = 9;
 
 void runSolution(int day, ReadInputCallback readInput);
