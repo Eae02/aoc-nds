@@ -6,7 +6,7 @@ session = input("please enter your session cookie: ")
 
 MAX_DAY = 9
 
-os.makedirs("./inputs", exist_ok=True)
+os.makedirs("./inp", exist_ok=True)
 
 for day in range(1, MAX_DAY + 1):
 	link = f"https://adventofcode.com/2020/day/{day}/input"
@@ -14,6 +14,6 @@ for day in range(1, MAX_DAY + 1):
 	if resp.status_code != 200:
 		print(f"Failed to get input, got status {resp.status_code}!")
 		exit(1)
-	with open(f"./inputs/{day}.txt", "w") as fp:
+	with open(f"./inp/{day}.txt", "w") as fp:
 		fp.write(resp.text)
 	
