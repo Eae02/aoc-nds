@@ -1,8 +1,9 @@
 /.vscode
 /obj
-/inputs
-/src/inputs
+/inp
+/src/inputs.h
 /aoc.elf
 /aoc.nds
 /nds.map
 .directory
+/src/res
