@@ -1,10 +1,11 @@
 #include "read_input.hpp"
 #include <stdio.h>
+#include <fat.h>
 
 #ifdef EMBEDDED_INPUTS
 #include "inputs.h"
 
-std::string_view readEmbeddedInput(int day) {
+static std::string_view readEmbeddedInput(int day) {
 	#define DAY_INPUT(d) case d: return std::string_view((const char*)(inp_ ## d ## _txt), inp_ ## d ## _txt_len);
 	switch (day) {
 	DAY_INPUT(1)
@@ -20,14 +21,15 @@ std::string_view readEmbeddedInput(int day) {
 	return {};
 }
 #else
-std::string_view readEmbeddedInput(int day) { return { }; }
+static std::string_view readEmbeddedInput(int day) { return { }; }
 #endif
 
 #include <memory>
 
+static bool couldInitializeLibFat = false;
 static std::unique_ptr<char[]> inputBuffer;
 
-std::string_view readFileInput(int day) {
+static std::string_view readFileInput(int day) {
 	inputBuffer.reset();
 	
 	char filePath[64];
@@ -48,4 +50,17 @@ std::string_view readFileInput(int day) {
 	}
 	
 	return std::string_view(inputBuffer.get(), inputLen);
+}
+
+void initInputReading() {
+	couldInitializeLibFat = fatInitDefault();
+}
+
+std::string_view readInput(int day) {
+	if (couldInitializeLibFat) {
+		std::string_view fileInput = readFileInput(day);
+		if (!fileInput.empty()) 
+			return fileInput;
+	}
+	return readEmbeddedInput(day);
 }

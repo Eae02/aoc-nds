@@ -10,6 +10,7 @@ LFLAGS="-specs=ds_arm9.specs -g -Wl,-Map,nds.map $ARCH -L$DEVKITPRO/libnds/lib -
 
 mkdir -p src/res
 $DEVKITPRO/tools/bin/grit res/bkg.png -fts -osrc/res/bkg
+$DEVKITPRO/tools/bin/grit res/console.png -fts -osrc/res/console
 
 if [[ -d "inp" ]]; then
 	CFLAGS="$CFLAGS -DEMBEDDED_INPUTS"
@@ -26,7 +27,10 @@ for f in $(find src -name "*.cpp"); do
 	$COMPILER $f $CFLAGS -c -o obj/$f.o &
 done
 
-$COMPILER -x assembler-with-cpp -g -mthumb -mthumb-interwork -c src/res/bkg.s -o obj/src/bkg.o
+for f in $(find src/res -name "*.s"); do
+	mkdir -p obj/$(dirname $f)
+	$COMPILER -x assembler-with-cpp -g -mthumb -mthumb-interwork -c $f -o obj/$f.o
+done
 
 wait
 

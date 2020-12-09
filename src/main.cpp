@@ -1,50 +1,53 @@
 #include <nds.h>
 #include <cstdio>
-#include <fat.h>
 
 #include "res/bkg.h"
+#include "console.hpp"
 #include "solutions/sol.hpp"
 
 int main() {
-	//lcdMainOnBottom();
+	lcdMainOnBottom();
 	
 	touchPosition touch;
-	PrintConsole console;
 	
-	videoSetMode(MODE_5_2D);
-	videoSetModeSub(MODE_0_2D);
+	videoSetModeSub(MODE_5_2D);
+	vramSetBankC(VRAM_C_SUB_BG_0x06200000);
 	
-	vramSetBankA(VRAM_A_MAIN_BG);
-	vramSetBankC(VRAM_C_SUB_BG);
+	consoleDebugInit(DebugDevice_NOCASH);
 	
-	int bg3 = bgInit(3, BgType_Bmp8, BgSize_B8_256x256, 0, 0);
+	console::init();
+	irqSet(IRQ_VBLANK, [] { console::update(); });
 	
-	consoleInit(&console, 3, BgType_Text4bpp, BgSize_T_256x256, 31, 0, false, true);
+	int topScreenBg = bgInitSub(3, BgType_Bmp8, BgSize_B8_256x256, 0, 0);
 	
-	if (!fatInitDefault()) {
-		printf("failed to initialize libfat\n");
-	}
+	dmaCopy(bkgBitmap, bgGetGfxPtr(topScreenBg), 256 * 256);
+	dmaCopy(bkgPal, BG_PALETTE_SUB, 256 * 2);
 	
-	ReadInputCallback readInput = &readEmbeddedInput;
-	dmaCopy(bkgBitmap, bgGetGfxPtr(bg3), 256 * 256);
-	dmaCopy(bkgPal, BG_PALETTE, 256 * 2);
-	
-	consoleSelect(&console);
+	int runningOnDay = -1;
 	
 	int prevKeyState = 0;
 	while(1) {
-		touchRead(&touch);
-		
 		swiWaitForVBlank();
+		touchRead(&touch);
 		scanKeys();
 		
 		int keys = keysHeld();
 		int newKeys = keys & ~prevKeyState;
 		
-		if (newKeys & KEY_X) {
-			consoleClear();
-			for (int d = 1; d <= MAX_DAY_IMPLEMETED; d++) {
-				runSolution(d, readInput);
+		console::updateInput(touch.px, touch.py);
+		
+		if (runningOnDay == -1 && (newKeys & KEY_A) != 0) {
+			runningOnDay = 0;
+			for (int d = 0; d < 25; d++) {
+				console::solStates[d].state = console::RunState::Waiting;
+			}
+		}
+		
+		if (runningOnDay != -1) {
+			console::runSolution(runningOnDay);
+			runningOnDay++;
+			if (runningOnDay == 25) {
+				runningOnDay = -1;
 			}
 		}
 		
