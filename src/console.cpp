@@ -115,8 +115,8 @@ void console::runSolution(int day) {
 	} else {
 		cpuStartTiming(0);
 		bool ok = solutions[day](input, solStates[day].answers);
-		uint32_t elapsedTicks = cpuEndTiming();
-		solStates[day].elapsedTime = elapsedTicks * 1000 / BUS_CLOCK;
+		u64 elapsedTicks = cpuEndTiming();
+		solStates[day].elapsedTime = (elapsedTicks * 1000UL + (u64)BUS_CLOCK / 2) / (u64)BUS_CLOCK;
 		if (!ok) {
 			solStates[day].failedMessage = "failed";
 		}
