@@ -19,6 +19,7 @@ bool solveDay6(std::string_view input, AnswerBuffer& ans);
 bool solveDay7(std::string_view input, AnswerBuffer& ans);
 bool solveDay8(std::string_view input, AnswerBuffer& ans);
 bool solveDay9(std::string_view input, AnswerBuffer& ans);
+bool solveDay10(std::string_view input, AnswerBuffer& ans);
 
 Solution solutions[25] = {
 	&solveDay1,
@@ -29,5 +30,6 @@ Solution solutions[25] = {
 	&solveDay6,
 	&solveDay7,
 	&solveDay8,
-	&solveDay9
+	&solveDay9,
+	&solveDay10
 };

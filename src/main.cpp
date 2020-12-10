@@ -14,6 +14,7 @@ int main() {
 	vramSetBankC(VRAM_C_SUB_BG_0x06200000);
 	
 	consoleDebugInit(DebugDevice_NOCASH);
+	initInputReading();
 	
 	console::init();
 	irqSet(IRQ_VBLANK, [] { console::update(); });
