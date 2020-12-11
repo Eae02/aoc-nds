@@ -9,62 +9,43 @@
 #include <stdio.h>
 
 bool solveDay11(std::string_view input, AnswerBuffer& ans) {
-	const int width = input.find('\n');
-	const int height = input.size() / (width + 1);
+	const int oriWidth = input.find('\n');
+	const int oriHeight = input.size() / (oriWidth + 1);
+	const int width = oriWidth + 2;
+	const int height = oriHeight + 2;
 	
-	std::vector<uint8_t> isSeat(width * height);
+	std::vector<uint8_t> isSeat(width * height, 1);
 	std::vector<std::array<int, 8>> nextSeeingSeatIdx(width * height);
-	std::vector<std::array<int, 8>> nextImmediateSeatIdx(width * height);
 	
-	int idx = 0;
-	for (int y = 0; y < height; y++) {
-		for (int x = 0; x < width; x++) {
-			char c = input[y * (width + 1) + x];
+	int idx = width + 1;
+	for (int y = 0; y < oriHeight; y++, idx += 2) {
+		for (int x = 0; x < oriWidth; x++, idx++) {
+			char c = input[y * (oriWidth + 1) + x];
 			isSeat[idx] = c != '.';
-			idx++;
 		}
 	}
 	
-	auto getIndexOrNeg1 = [&] (int x, int y) {
-		if (x < 0 || y < 0 || x >= width || y >= height)
-			return -1;
+	auto getIndex = [&] (int x, int y) {
 		return x + y * width;
 	};
 	
-	idx = 0;
-	for (int y = 0; y < height; y++) {
-		for (int x = 0; x < width; x++) {
-			int nextSeatIdxImm = 0;
-			int nextSeatIdxSee = 0;
+	idx = width + 1;
+	for (int y = 1; y <= oriHeight; y++, idx += 2) {
+		for (int x = 1; x <= oriWidth; x++, idx++) {
+			int nextSeatIdxIdx = 0;
 			for (int dy = -1; dy <= 1; dy++) {
 				for (int dx = -1; dx <= 1; dx++) {
 					if (dx == 0 && dy == 0) continue;
 					
 					int nx = x + dx;
 					int ny = y + dy;
-					
-					int ni = getIndexOrNeg1(nx, ny);
-					if (ni != -1) {
-						nextImmediateSeatIdx[idx][nextSeatIdxImm++] = ni;
-					}
-					
-					while (nx >= 0 && ny >= 0 && nx < width && ny < height && !isSeat[ny * width + nx]) {
+					while (!isSeat[getIndex(nx, ny)]) {
 						nx += dx;
 						ny += dy;
 					}
-					ni = getIndexOrNeg1(nx, ny);
-					if (ni != -1) {
-						nextSeeingSeatIdx[idx][nextSeatIdxSee++] = ni;
-					}
+					nextSeeingSeatIdx[idx][nextSeatIdxIdx++] = getIndex(nx, ny);
 				}
 			}
-			while (nextSeatIdxImm < 8) {
-				nextImmediateSeatIdx[idx][nextSeatIdxImm++] = -1;
-			}
-			while (nextSeatIdxSee < 8) {
-				nextSeeingSeatIdx[idx][nextSeatIdxSee++] = -1;
-			}
-			idx++;
 		}
 	}
 	
@@ -74,47 +55,40 @@ bool solveDay11(std::string_view input, AnswerBuffer& ans) {
 	std::vector<uint8_t> wasOccP2(width * height, 0);
 	bool simulateAgain = true;
 	while (simulateAgain) {
-		idx = 0;
+		idx = width + 1;
 		simulateAgain = false;
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++, idx++) {
+		for (int y = 1; y <= oriHeight; y++, idx += 2) {
+			for (int x = 1; x <= oriWidth; x++, idx++) {
 				if (!isSeat[idx])
 					continue;
+				
+				int pRowIdx = idx - width;
+				int nRowIdx = idx + width;
 				auto anyOccP1 = [&] () {
-					for (int ni : nextImmediateSeatIdx[idx]) {
-						if (ni == -1) break;
-						if (wasOccP1[ni])
-							return true;
-					}
-					return false;
+					return
+						wasOccP1[idx - 1] || wasOccP1[idx + 1] || 
+						wasOccP1[pRowIdx - 1] || wasOccP1[pRowIdx] || wasOccP1[pRowIdx + 1] ||
+						wasOccP1[nRowIdx - 1] || wasOccP1[nRowIdx] || wasOccP1[nRowIdx + 1];
 				};
 				auto anyOccP2 = [&] () {
 					for (int ni : nextSeeingSeatIdx[idx]) {
-						if (ni == -1) break;
 						if (wasOccP2[ni])
 							return true;
 					}
 					return false;
 				};
 				auto atLeast4OccupiedP1 = [&] () {
-					int c = 0;
-					for (int ni : nextImmediateSeatIdx[idx]) {
-						if (ni == -1) break;
-						if (wasOccP1[ni] && (++c) == 4) {
-							return true;
-						}
-					}
-					return false;
+					int c = wasOccP1[idx - 1] + wasOccP1[idx + 1] + 
+						wasOccP1[pRowIdx - 1] + wasOccP1[pRowIdx] + wasOccP1[pRowIdx + 1] +
+						wasOccP1[nRowIdx - 1] + wasOccP1[nRowIdx] + wasOccP1[nRowIdx + 1];
+					return c >= 4;
 				};
 				auto atLeast5OccupiedP2 = [&] () {
 					int c = 0;
 					for (int ni : nextSeeingSeatIdx[idx]) {
-						if (ni == -1) break;
-						if (wasOccP2[ni] && (++c) == 5) {
-							return true;
-						}
+						c += wasOccP2[ni];
 					}
-					return false;
+					return c >= 5;
 				};
 				
 				if (!wasOccP1[idx]) {
