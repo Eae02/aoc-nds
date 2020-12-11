@@ -1,4 +1,5 @@
 #include "console.hpp"
+#include "common.hpp"
 #include "res/console.h"
 #include <nds.h>
 #include <stdio.h>
@@ -9,6 +10,14 @@ static int maxScroll;
 
 constexpr int PIXELS_Y_HEADER = 3 * 8;
 constexpr int PIXELS_Y_PER_DAY = 8 * 5;
+
+void irqInterruptHandler() {
+	touchPosition touch;
+	touchRead(&touch);
+	scanKeys();
+	console::updateInput(touch.px, touch.py);
+	console::update();
+}
 
 void console::init() {
 	videoSetMode(MODE_5_2D | DISPLAY_BG0_ACTIVE);
@@ -27,6 +36,8 @@ void console::init() {
 			maxScroll += PIXELS_Y_PER_DAY;
 	}
 	maxScroll = std::max(maxScroll - SCREEN_HEIGHT, 0);
+	
+	irqSet(IRQ_VBLANK, irqInterruptHandler);
 }
 
 static u16 allLineData[32][32];
@@ -62,21 +73,31 @@ void setLineData(int line, const char* data) {
 static volatile int prevTouchY = 0;
 static volatile bool wasTouching = false;
 static volatile int scrollY = 0;
+static volatile int dayToRun = -1;
+
+void console::updateOutsideIRQ() {
+	int dayToRunLocal = dayToRun;
+	if (dayToRunLocal != -1) {
+		if (solStates[dayToRunLocal].state == RunState::NotRun) {
+			console::runSolution(dayToRunLocal);
+		}
+		dayToRunLocal = -1;
+	}
+}
 
 void console::updateInput(int touchX, int touchY) {
 	int keys = keysHeld();
 	bool touching = (keys & KEY_TOUCH) != 0;
 	
+	dayToRun = -1;
 	if (touching && !wasTouching) {
 		for (int d = 0; d < 25; d++) {
-			if (solStates[d].state != RunState::NotRun)
-				continue;
 			int tapToRunLoX = ((d < 10) ? 8 : 9) * 8;
 			int tapToRunHiX = tapToRunLoX + 10 * 8;
 			int tapToRunLoY = PIXELS_Y_HEADER + d * PIXELS_Y_PER_DAY - scrollY;
 			int tapToRunHiY = tapToRunLoY + 8 * 2;
 			if (touchX >= tapToRunLoX && touchX <= tapToRunHiX && touchY >= tapToRunLoY && touchY <= tapToRunHiY) {
-				console::runSolution(d);
+				dayToRun = d;
 				break;
 			}
 		}
@@ -103,6 +124,33 @@ static volatile int consoleFrameIdx = 0;
 static volatile int numDots = 0;
 static constexpr int FRAMES_PER_DOT = 30;
 
+static inline void clearLineData() {
+	std::fill_n(allLineData[0], sizeof(allLineData) / 2, consoleMap[1000]);
+}
+
+void console::runAllNoInteraction() {
+	irqDisable(IRQ_VBLANK);
+	REG_BG0VOFS = 0;
+	clearLineData();
+	dmaFillHalfWords(consoleMap[1000], (u16*)SCREEN_BASE_BLOCK(0), sizeof(allLineData));
+	constexpr size_t bytesToCopyFirstLine = sizeof(u16) * 32 * 2;
+	
+	for (int d = 0; d < 25; d++) {
+		if (solutions[d] == nullptr)
+			continue;
+		char msgBuffer[64];
+		snprintf(msgBuffer, sizeof(msgBuffer), "running on day %d...", d + 1);
+		setLineData(0, msgBuffer);
+		DC_FlushRange(allLineData, bytesToCopyFirstLine);
+		dmaCopy(allLineData, (void*)SCREEN_BASE_BLOCK(0), bytesToCopyFirstLine);
+		
+		runSolution(d);
+	}
+	
+	irqEnable(IRQ_VBLANK);
+	console::update();
+}
+
 void console::runSolution(int day) {
 	if (solutions[day] == nullptr)
 		return;
@@ -115,8 +163,8 @@ void console::runSolution(int day) {
 	} else {
 		cpuStartTiming(0);
 		bool ok = solutions[day](input, solStates[day].answers);
-		u64 elapsedTicks = cpuEndTiming();
-		solStates[day].elapsedTime = (elapsedTicks * 1000UL + (u64)BUS_CLOCK / 2) / (u64)BUS_CLOCK;
+		uint32_t elapsedTicks = cpuEndTiming();
+		solStates[day].elapsedTime = ticksToMS(elapsedTicks);
 		if (!ok) {
 			solStates[day].failedMessage = "failed";
 		}
@@ -135,7 +183,7 @@ void console::update() {
 	char dotDotDot[4] = "...";
 	dotDotDot[numDots + 1] = '\0';
 	
-	std::fill_n(allLineData[0], sizeof(allLineData) / 2, consoleMap[1000]);
+	clearLineData();
 	char lineBuffer[64];
 	
 	constexpr int LINE_PIXELS_H = 8;
@@ -143,6 +191,7 @@ void console::update() {
 	
 	int nextHalfLine = -(scrollY / LINE_PIXELS_H);
 	setLineData(nextHalfLine, "Press \eA\e to run all solutions");
+	
 	nextHalfLine += 3;
 	
 	for (int d = 0; d < 25; d++) {
@@ -160,7 +209,7 @@ void console::update() {
 			snprintf(lineBuffer, sizeof(lineBuffer), "Day \e%d\e: running%s", d + 1, dotDotDot);
 			break;
 		case RunState::Waiting:
-			snprintf(lineBuffer, sizeof(lineBuffer), "Day \e%d\e: waiting%s", d + 1, dotDotDot);
+			snprintf(lineBuffer, sizeof(lineBuffer), "Day \e%d\e: waiting", d + 1);
 			break;
 		case RunState::Done:
 			if (solStates[d].failedMessage) {

@@ -15,3 +15,5 @@ void printStringView(std::string_view sv);
 
 int parseInt(std::string_view str);
 int parseIntOr(std::string_view str, int def);
+
+uint32_t ticksToMS(uint32_t ticks);

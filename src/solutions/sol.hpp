@@ -15,4 +15,4 @@ using Solution = bool(*)(std::string_view input, AnswerBuffer& ans);
 
 extern Solution solutions[25];
 
-bool runSolution(int day, ReadInputCallback readInput);
+void testRunSolution(int day);

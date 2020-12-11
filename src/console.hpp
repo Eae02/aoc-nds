@@ -19,10 +19,13 @@ namespace console {
 	
 	extern SolutionState solStates[25];
 	
+	void runAllNoInteraction();
 	void runSolution(int day);
 	
 	void init();
 	void update();
 	
 	void updateInput(int touchX, int touchY);
+	
+	void updateOutsideIRQ();
 }

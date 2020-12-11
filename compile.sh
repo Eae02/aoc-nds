@@ -5,8 +5,8 @@ set -e
 COMPILER="$DEVKITARM/bin/arm-none-eabi-g++"
 NDSTOOL="$DEVKITPRO/tools/bin/ndstool"
 ARCH="-mthumb -mthumb-interwork"
-CFLAGS="-Wall -g -O2 --std=c++20 -Wno-volatile -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math -fno-rtti -fno-exceptions -I$DEVKITPRO/libnds/include -DARM9 $ARCH"
-LFLAGS="-specs=ds_arm9.specs -g -Wl,-Map,nds.map $ARCH -L$DEVKITPRO/libnds/lib -lfilesystem -lfat -lnds9"
+CFLAGS="-Wall -Ofast --std=c++20 -Wno-volatile -march=armv5te -mtune=arm946e-s -fomit-frame-pointer -ffast-math -fno-rtti -fno-exceptions -I$DEVKITPRO/libnds/include -DARM9 $ARCH"
+LFLAGS="-specs=ds_arm9.specs -Wl,-Map,nds.map $ARCH -L$DEVKITPRO/libnds/lib -lfilesystem -lfat -lnds9"
 
 mkdir -p src/res
 $DEVKITPRO/tools/bin/grit res/bkg.png -fts -osrc/res/bkg

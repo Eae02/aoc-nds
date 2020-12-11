@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <nds.h>
 #include <charconv>
 
 std::string_view takeCharsUntil(std::string_view& str, std::string_view delim) {
@@ -70,4 +71,8 @@ int parseIntOr(std::string_view str, int def) {
 	if (std::from_chars(str.data(), str.data() + str.size(), value).ec != std::errc())
 		return def;
 	return value;
+}
+
+uint32_t ticksToMS(uint32_t ticks) {
+	return ((uint64_t)ticks * 1000UL + (uint64_t)BUS_CLOCK / 2) / (uint64_t)BUS_CLOCK;
 }
