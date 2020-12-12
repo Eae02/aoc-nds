@@ -4,7 +4,7 @@ import sys, os, requests
 
 session = input("please enter your session cookie: ")
 
-MAX_DAY = 11
+MAX_DAY = 12
 
 os.makedirs("./inp", exist_ok=True)
 

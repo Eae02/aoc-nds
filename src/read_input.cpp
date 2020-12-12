@@ -19,6 +19,7 @@ static std::string_view readEmbeddedInput(int day) {
 	DAY_INPUT(9)
 	DAY_INPUT(10)
 	DAY_INPUT(11)
+	DAY_INPUT(12)
 	}
 	return {};
 }

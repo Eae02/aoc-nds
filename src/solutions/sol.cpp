@@ -22,6 +22,7 @@ bool solveDay8(std::string_view input, AnswerBuffer& ans);
 bool solveDay9(std::string_view input, AnswerBuffer& ans);
 bool solveDay10(std::string_view input, AnswerBuffer& ans);
 bool solveDay11(std::string_view input, AnswerBuffer& ans);
+bool solveDay12(std::string_view input, AnswerBuffer& ans);
 
 Solution solutions[25] = {
 	&solveDay1,
@@ -34,7 +35,8 @@ Solution solutions[25] = {
 	&solveDay8,
 	&solveDay9,
 	&solveDay10,
-	&solveDay11
+	&solveDay11,
+	&solveDay12
 };
 
 void testRunSolution(int day) {
