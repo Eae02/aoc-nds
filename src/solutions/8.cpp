@@ -81,7 +81,7 @@ bool solveDay8(std::string_view input, AnswerBuffer& ans) {
 		} else if (type == "nop") {
 			inst.type = InstType::nop;
 		} else {
-			printf("unknown instruction %s\n", withNullTerminator(type));
+			fprintf(stderr, "unknown instruction %s\n", withNullTerminator(type));
 			return false;
 		}
 	}

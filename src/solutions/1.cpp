@@ -24,7 +24,7 @@ bool solveDay1(std::string_view input, AnswerBuffer& ans) {
 		int value;
 		auto parseRes = std::from_chars(remInput, &input.back(), value);
 		if (parseRes.ec != std::errc()) {
-			printf("parse error!");
+			fprintf(stderr, "parse error!");
 			return false;
 		}
 		remInput = parseRes.ptr;

@@ -24,7 +24,7 @@ bool solveDay9(std::string_view input, AnswerBuffer& ans) {
 		
 		uint64_t value;
 		if (std::from_chars(line.data(), line.data() + line.size(), value).ec != std::errc()) {
-			printf("parse error\n");
+			fprintf(stderr, "parse error\n");
 			return false;
 		}
 		

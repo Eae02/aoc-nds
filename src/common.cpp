@@ -52,14 +52,14 @@ const char* withNullTerminator(std::string_view sv) {
 }
 
 void printStringView(std::string_view sv) {
-	printf("psv: %s\n", withNullTerminator(sv));
+	fprintf(stderr, "psv: %s\n", withNullTerminator(sv));
 }
 
 int parseInt(std::string_view str) {
 	skipSpaces(str);
 	int value;
 	if (std::from_chars(str.data(), str.data() + str.size(), value).ec != std::errc()) {
-		printf("parseInt called with %s!\n", withNullTerminator(str));
+		fprintf(stderr, "parseInt called with %s!\n", withNullTerminator(str));
 		return 0;
 	}
 	return value;

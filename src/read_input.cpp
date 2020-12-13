@@ -20,6 +20,7 @@ static std::string_view readEmbeddedInput(int day) {
 	DAY_INPUT(10)
 	DAY_INPUT(11)
 	DAY_INPUT(12)
+	DAY_INPUT(13)
 	}
 	return {};
 }
@@ -39,7 +40,7 @@ static std::string_view readFileInput(int day) {
 	snprintf(filePath, sizeof(filePath), "inp/%d.txt", day);
 	FILE* fp = fopen(filePath, "rb");
 	if (fp == nullptr) {
-		printf("error opening %s\n", filePath);
+		fprintf(stderr, "error opening %s\n", filePath);
 		return {};
 	}
 	
@@ -48,7 +49,7 @@ static std::string_view readFileInput(int day) {
 	fseek(fp, 0, SEEK_SET);
 	inputBuffer = std::make_unique<char[]>(inputLen);
 	if (fread(inputBuffer.get(), 1, inputLen, fp) != inputLen) {
-		printf("error reading %s\n", filePath);
+		fprintf(stderr, "error reading %s\n", filePath);
 		return {};
 	}
 	
