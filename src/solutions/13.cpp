@@ -48,10 +48,10 @@ bool solveDay13(std::string_view input, AnswerBuffer& ans) {
 	for (const std::pair<int, int>& e : eqsPart2) {
 		int64_t pp = p / (int64_t)e.second, ppi, y;
 		extEuclid(pp, e.second, ppi, y);
-		ansPart2 = (ansPart2 + (int64_t)e.first * ppi * pp) % p;
+		ansPart2 = (ansPart2 + (int64_t)e.first * ppi * pp + p) % p;
 	}
 	
 	snprintf(ans.ans1, sizeof(ans.ans1), "%d", ansPart1.first * ansPart1.second);
-	snprintf(ans.ans2, sizeof(ans.ans2), "%lld", -ansPart2);
+	snprintf(ans.ans2, sizeof(ans.ans2), "%lld", ansPart2);
 	return true;
 }
