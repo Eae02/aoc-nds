@@ -11,34 +11,13 @@ void AnswerBuffer::answerWithInts(int part1, int part2) {
 	snprintf(ans2, sizeof(ans2), "%d", part2);
 }
 
-bool solveDay1(std::string_view input, AnswerBuffer& ans);
-bool solveDay2(std::string_view input, AnswerBuffer& ans);
-bool solveDay3(std::string_view input, AnswerBuffer& ans);
-bool solveDay4(std::string_view input, AnswerBuffer& ans);
-bool solveDay5(std::string_view input, AnswerBuffer& ans);
-bool solveDay6(std::string_view input, AnswerBuffer& ans);
-bool solveDay7(std::string_view input, AnswerBuffer& ans);
-bool solveDay8(std::string_view input, AnswerBuffer& ans);
-bool solveDay9(std::string_view input, AnswerBuffer& ans);
-bool solveDay10(std::string_view input, AnswerBuffer& ans);
-bool solveDay11(std::string_view input, AnswerBuffer& ans);
-bool solveDay12(std::string_view input, AnswerBuffer& ans);
-bool solveDay13(std::string_view input, AnswerBuffer& ans);
-
+#define XM_DAY(d) bool solveDay ## d(std::string_view input, AnswerBuffer& ans);
+#include "../solved_days_xm.inl"
+#undef XM_DAY
 Solution solutions[25] = {
-	&solveDay1,
-	&solveDay2,
-	&solveDay3,
-	&solveDay4,
-	&solveDay5,
-	&solveDay6,
-	&solveDay7,
-	&solveDay8,
-	&solveDay9,
-	&solveDay10,
-	&solveDay11,
-	&solveDay12,
-	&solveDay13
+#define XM_DAY(d) &solveDay ## d,
+#include "../solved_days_xm.inl"
+#undef XM_DAY
 };
 
 void testRunSolution(int day) {

@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <bitset>
-#include <assert.h>
 #include <stdio.h>
 
 bool solveDay6(std::string_view input, AnswerBuffer& ans) {

@@ -28,4 +28,6 @@ namespace console {
 	void updateInput(int touchX, int touchY);
 	
 	void updateOutsideIRQ();
+	
+	void setProgress(int progress);
 }

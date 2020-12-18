@@ -5,6 +5,10 @@
 #include "console.hpp"
 #include "solutions/sol.hpp"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dirent.h>
 int main() {
 	lcdMainOnBottom();
 	
@@ -15,6 +19,8 @@ int main() {
 	initInputReading();
 	
 	console::init();
+	
+	//testRunSolution(16);
 	
 	int topScreenBg = bgInitSub(3, BgType_Bmp8, BgSize_B8_256x256, 0, 0);
 	

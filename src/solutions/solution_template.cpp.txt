@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <bitset>
 #include <memory>
-#include <assert.h>
 #include <string.h>
 #include <stdio.h>
 

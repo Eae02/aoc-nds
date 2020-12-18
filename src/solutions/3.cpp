@@ -2,7 +2,6 @@
 #include "../common.hpp"
 
 #include <algorithm>
-#include <assert.h>
 #include <stdio.h>
 
 uint32_t countTrees(std::string_view input, uint32_t dx, uint32_t dy) {

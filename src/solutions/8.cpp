@@ -5,7 +5,6 @@
 #include <bitset>
 #include <memory>
 #include <span>
-#include <assert.h>
 #include <string.h>
 #include <stdio.h>
 

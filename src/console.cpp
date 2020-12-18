@@ -11,6 +11,8 @@ static int maxScroll;
 constexpr int PIXELS_Y_HEADER = 3 * 8;
 constexpr int PIXELS_Y_PER_DAY = 8 * 5;
 
+static bool dayHasLongOutput[26] = { };
+
 void irqInterruptHandler() {
 	touchPosition touch;
 	touchRead(&touch);
@@ -20,6 +22,8 @@ void irqInterruptHandler() {
 }
 
 void console::init() {
+	dayHasLongOutput[14] = true;
+	
 	videoSetMode(MODE_5_2D | DISPLAY_BG0_ACTIVE);
 	vramSetBankA(VRAM_A_MAIN_BG);
 	
@@ -34,6 +38,8 @@ void console::init() {
 	for (int d = 0; d < 25; d++) {
 		if (solutions[d] != nullptr)
 			maxScroll += PIXELS_Y_PER_DAY;
+		if (dayHasLongOutput[d + 1])
+			maxScroll += 16;
 	}
 	maxScroll = std::max(maxScroll - SCREEN_HEIGHT, 0);
 	
@@ -91,15 +97,18 @@ void console::updateInput(int touchX, int touchY) {
 	
 	dayToRun = -1;
 	if (touching && !wasTouching) {
+		int tapToRunLoY = PIXELS_Y_HEADER - scrollY;
 		for (int d = 0; d < 25; d++) {
 			int tapToRunLoX = ((d < 10) ? 8 : 9) * 8;
 			int tapToRunHiX = tapToRunLoX + 10 * 8;
-			int tapToRunLoY = PIXELS_Y_HEADER + d * PIXELS_Y_PER_DAY - scrollY;
 			int tapToRunHiY = tapToRunLoY + 8 * 2;
 			if (touchX >= tapToRunLoX && touchX <= tapToRunHiX && touchY >= tapToRunLoY && touchY <= tapToRunHiY) {
 				dayToRun = d;
 				break;
 			}
+			tapToRunLoY += PIXELS_Y_PER_DAY;
+			if (dayHasLongOutput[d + 1])
+				tapToRunLoY += 16;
 		}
 	}
 	
@@ -128,12 +137,19 @@ static inline void clearLineData() {
 	std::fill_n(allLineData[0], sizeof(allLineData) / 2, consoleMap[1000]);
 }
 
+static bool isRunningWoInteraction = false;
+static int noInteractionCurrentDay;
+static volatile int solutionProgress = -1;
+
+static constexpr size_t BYTES_FIRST_LINE = sizeof(u16) * 32 * 2;
+
 void console::runAllNoInteraction() {
 	irqDisable(IRQ_VBLANK);
 	REG_BG0VOFS = 0;
 	clearLineData();
 	dmaFillHalfWords(consoleMap[1000], (u16*)SCREEN_BASE_BLOCK(0), sizeof(allLineData));
-	constexpr size_t bytesToCopyFirstLine = sizeof(u16) * 32 * 2;
+	
+	isRunningWoInteraction = true;
 	
 	for (int d = 0; d < 25; d++) {
 		if (solutions[d] == nullptr)
@@ -141,19 +157,37 @@ void console::runAllNoInteraction() {
 		char msgBuffer[64];
 		snprintf(msgBuffer, sizeof(msgBuffer), "running on day %d...", d + 1);
 		setLineData(0, msgBuffer);
-		DC_FlushRange(allLineData, bytesToCopyFirstLine);
-		dmaCopy(allLineData, (void*)SCREEN_BASE_BLOCK(0), bytesToCopyFirstLine);
+		DC_FlushRange(allLineData, BYTES_FIRST_LINE);
+		dmaCopy(allLineData, (void*)SCREEN_BASE_BLOCK(0), BYTES_FIRST_LINE);
 		
+		noInteractionCurrentDay = d + 1;
 		runSolution(d);
 	}
+	
+	isRunningWoInteraction = false;
 	
 	irqEnable(IRQ_VBLANK);
 	console::update();
 }
 
+void console::setProgress(int progress) {
+	if (progress == solutionProgress)
+		return;
+	solutionProgress = progress;
+	
+	if (isRunningWoInteraction) {
+		char msgBuffer[64];
+		snprintf(msgBuffer, sizeof(msgBuffer), "running on day %d (%d%%)...", noInteractionCurrentDay, progress);
+		setLineData(0, msgBuffer);
+		DC_FlushRange(allLineData, BYTES_FIRST_LINE);
+		dmaCopy(allLineData, (void*)SCREEN_BASE_BLOCK(0), BYTES_FIRST_LINE);
+	}
+}
+
 void console::runSolution(int day) {
 	if (solutions[day] == nullptr)
 		return;
+	solutionProgress = -1;
 	solStates[day].state = RunState::Running;
 	solStates[day].failedMessage = nullptr;
 	
@@ -206,7 +240,11 @@ void console::update() {
 			snprintf(lineBuffer, sizeof(lineBuffer), "Day \e%d\e: [\etap to run\e]", d + 1);
 			break;
 		case RunState::Running:
-			snprintf(lineBuffer, sizeof(lineBuffer), "Day \e%d\e: running%s", d + 1, dotDotDot);
+			if (solutionProgress != -1) {
+				snprintf(lineBuffer, sizeof(lineBuffer), "Day \e%d\e: running (%d%%)%s", d + 1, solutionProgress, dotDotDot);
+			} else {
+				snprintf(lineBuffer, sizeof(lineBuffer), "Day \e%d\e: running%s", d + 1, dotDotDot);
+			}
 			break;
 		case RunState::Waiting:
 			snprintf(lineBuffer, sizeof(lineBuffer), "Day \e%d\e: waiting", d + 1);
@@ -223,10 +261,17 @@ void console::update() {
 		}
 		setLineData(nextHalfLine, lineBuffer);
 		
-		snprintf(lineBuffer, sizeof(lineBuffer), " P1=\e%s\e, P2=\e%s\e", part1Ans, part2Ans);
-		setLineData(nextHalfLine + 2, lineBuffer);
-		
-		nextHalfLine += 5;
+		if (dayHasLongOutput[d + 1]) {
+			snprintf(lineBuffer, sizeof(lineBuffer), " P1=\e%s\e", part1Ans);
+			setLineData(nextHalfLine + 2, lineBuffer);
+			snprintf(lineBuffer, sizeof(lineBuffer), " P2=\e%s\e", part2Ans);
+			setLineData(nextHalfLine + 4, lineBuffer);
+			nextHalfLine += 7;
+		} else {
+			snprintf(lineBuffer, sizeof(lineBuffer), " P1=\e%s\e, P2=\e%s\e", part1Ans, part2Ans);
+			setLineData(nextHalfLine + 2, lineBuffer);
+			nextHalfLine += 5;
+		}
 	}
 	
 	DC_FlushRange(allLineData, sizeof(allLineData));

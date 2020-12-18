@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <bitset>
 #include <memory>
-#include <assert.h>
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
@@ -16,8 +15,6 @@ int64_t extEuclid(int64_t a, int64_t b, int64_t& x, int64_t& y) {
 	}
 	return x = 1, y = 0, a;
 }
-
-
 
 bool solveDay13(std::string_view input, AnswerBuffer& ans) {
 	size_t firstNewline = input.find('\n');
@@ -52,6 +49,6 @@ bool solveDay13(std::string_view input, AnswerBuffer& ans) {
 	}
 	
 	snprintf(ans.ans1, sizeof(ans.ans1), "%d", ansPart1.first * ansPart1.second);
-	snprintf(ans.ans2, sizeof(ans.ans2), "%lld", ansPart2);
+	snprintf(ans.ans2, sizeof(ans.ans2), "%lld", -ansPart2);
 	return true;
 }

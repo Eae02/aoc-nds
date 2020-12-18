@@ -2,6 +2,8 @@
 
 #include <string_view>
 
+#define assert(x) if (!(x)) { fprintf(stderr, "error %s @%s:%d\n", #x, __FILE__, __LINE__); std::abort(); }
+
 std::string_view takeCharsUntil(std::string_view& str, std::string_view delim);
 
 void skipSpaces(std::string_view& str);

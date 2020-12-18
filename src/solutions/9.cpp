@@ -6,7 +6,6 @@
 #include <bitset>
 #include <memory>
 #include <charconv>
-#include <assert.h>
 #include <string.h>
 #include <stdio.h>
 

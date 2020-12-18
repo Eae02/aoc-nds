@@ -2,7 +2,6 @@
 #include "../common.hpp"
 
 #include <algorithm>
-#include <assert.h>
 #include <stdio.h>
 
 enum {

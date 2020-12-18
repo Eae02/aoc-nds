@@ -6,21 +6,10 @@
 #include "inputs.h"
 
 static std::string_view readEmbeddedInput(int day) {
-	#define DAY_INPUT(d) case d: return std::string_view((const char*)(inp_ ## d ## _txt), inp_ ## d ## _txt_len);
 	switch (day) {
-	DAY_INPUT(1)
-	DAY_INPUT(2)
-	DAY_INPUT(3)
-	DAY_INPUT(4)
-	DAY_INPUT(5)
-	DAY_INPUT(6)
-	DAY_INPUT(7)
-	DAY_INPUT(8)
-	DAY_INPUT(9)
-	DAY_INPUT(10)
-	DAY_INPUT(11)
-	DAY_INPUT(12)
-	DAY_INPUT(13)
+#define XM_DAY(d) case d: return std::string_view((const char*)(inp_ ## d ## _txt), inp_ ## d ## _txt_len);
+#include "solved_days_xm.inl"
+#undef XM_DAY
 	}
 	return {};
 }
@@ -58,6 +47,9 @@ static std::string_view readFileInput(int day) {
 
 void initInputReading() {
 	couldInitializeLibFat = fatInitDefault();
+	if (!couldInitializeLibFat) {
+		fprintf(stderr, "could not init libfat\n");
+	}
 }
 
 std::string_view readInput(int day) {
