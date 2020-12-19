@@ -18,3 +18,5 @@ extern Solution solutions[25];
 void initSolutions();
 
 void testRunSolution(int day);
+
+extern void(*setSolutionProgress)(int progress);

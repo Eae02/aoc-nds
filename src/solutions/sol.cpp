@@ -1,6 +1,7 @@
 #include "sol.hpp"
 #include "../common.hpp"
 #include "../read_input.hpp"
+#include "../console.hpp"
 
 #include <stdio.h>
 #include <nds/timers.h>
@@ -17,7 +18,10 @@ void AnswerBuffer::answerWithInts(int part1, int part2) {
 
 Solution solutions[25] = { };
 
+void(*setSolutionProgress)(int progress);
+
 void initSolutions() {
+	setSolutionProgress = console::setProgress;
 #define XM_DAY(d) solutions[d - 1] = &solveDay ## d;
 #include "../solved_days_xm.inl"
 #undef XM_DAY
@@ -34,9 +38,12 @@ void testRunSolution(int day) {
 		return;
 	}
 	AnswerBuffer ans;
+	
+	setSolutionProgress = [] (int progress) { fprintf(stderr, "solution progress: %d%%\n", progress); };
 	cpuStartTiming(0);
 	bool ok = solutions[day - 1](input, ans);
 	u64 elapsedTicks = cpuEndTiming();
+	setSolutionProgress = console::setProgress;
 	
 	if (!ok) {
 		fprintf(stderr, "solving day %d failed\n time: %lums\n", day, ticksToMS(elapsedTicks));

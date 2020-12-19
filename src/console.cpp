@@ -23,6 +23,7 @@ void irqInterruptHandler() {
 
 void console::init() {
 	dayHasLongOutput[14] = true;
+	dayHasLongOutput[18] = true;
 	
 	videoSetMode(MODE_5_2D | DISPLAY_BG0_ACTIVE);
 	vramSetBankA(VRAM_A_MAIN_BG);
@@ -99,6 +100,7 @@ void console::updateInput(int touchX, int touchY) {
 	if (touching && !wasTouching) {
 		int tapToRunLoY = PIXELS_Y_HEADER - scrollY;
 		for (int d = 0; d < 25; d++) {
+			if (solutions[d] == nullptr) continue;
 			int tapToRunLoX = ((d < 10) ? 8 : 9) * 8;
 			int tapToRunHiX = tapToRunLoX + 10 * 8;
 			int tapToRunHiY = tapToRunLoY + 8 * 2;

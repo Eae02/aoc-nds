@@ -66,7 +66,7 @@ bool solveDay16(std::string_view input, AnswerBuffer& ans) {
 			if (colPos == std::string_view::npos)
 				continue;
 			
-			assertRet(numFields < MAX_FIELDS);
+			assertRet(numFields < (int)MAX_FIELDS);
 			fields[numFields].isDeparture = line.starts_with("departure");
 			
 			size_t orPos = line.find("or", colPos);
@@ -154,7 +154,7 @@ bool solveDay16(std::string_view input, AnswerBuffer& ans) {
 	}
 	
 	int64_t part2Ans = 1;
-	for (size_t i = 0; i < numFields; i++) {
+	for (int i = 0; i < numFields; i++) {
 		if (fields[fieldMapping[i]].isDeparture) {
 			part2Ans *= myTicketFields[i];
 		}

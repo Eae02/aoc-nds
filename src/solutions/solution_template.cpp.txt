@@ -6,6 +6,7 @@
 #include <memory>
 #include <string.h>
 #include <stdio.h>
+#include <nds/ndstypes.h>
 
 bool solveDay_(std::string_view input, AnswerBuffer& ans) {
 	int part1Ans = 0;
