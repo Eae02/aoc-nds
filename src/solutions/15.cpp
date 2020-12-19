@@ -1,6 +1,5 @@
 #include "sol.hpp"
 #include "../common.hpp"
-#include "../console.hpp"
 
 #include <algorithm>
 #include <bitset>
@@ -51,7 +50,7 @@ bool solveDay15(std::string_view input, AnswerBuffer& ans) {
 		}
 		
 		for (; it < ITERATIONS_PART_2; it++) {
-			console::setProgress((uint32_t)it * (uint32_t)100 / (uint32_t)ITERATIONS_PART_2);
+			setSolutionProgress((uint32_t)it * (uint32_t)100 / (uint32_t)ITERATIONS_PART_2);
 			
 			if (prevNumberLastSeen != -1) {
 				num = it - prevNumberLastSeen - 1;

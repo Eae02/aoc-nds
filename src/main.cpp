@@ -34,6 +34,8 @@ int main() {
 		
 		if ((keys & KEY_A) != 0) {
 			console::runAllNoInteraction();
+		} else if ((keys & KEY_START) != 0) {
+			console::reset();
 		}
 		
 		console::updateOutsideIRQ();

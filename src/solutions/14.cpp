@@ -20,6 +20,7 @@ struct MemoryWrite {
 	uint64_t val;
 };
 
+template <bool ReportProgress>
 uint64_t calcMemorySum(std::vector<MemoryWrite>& memory) {
 	constexpr uint32_t HASH_BITS = MASK_LEN / 2;
 	
@@ -28,6 +29,10 @@ uint64_t calcMemorySum(std::vector<MemoryWrite>& memory) {
 	
 	uint64_t ans = 0;
 	for (int i = (int)memory.size() - 1; i >= 0; i--) {
+		if constexpr (ReportProgress) {
+			setSolutionProgress(50 + (memory.size() - i) * 50 / memory.size());
+		}
+		
 		const uint32_t group =
 			((uint32_t)memory[i].addr & (uint32_t)((1 << HASH_BITS) - 1)) ^
 			((uint32_t)memory[i].addr >> (uint32_t)HASH_BITS);
@@ -113,16 +118,18 @@ bool solveDay14(std::string_view input, AnswerBuffer& ans) {
 	assert(part2Writes.size() <= reserveCountWrites);
 	assert(part1Memory.size() <= reserveCountWrites);
 	
-	uint64_t part1Ans = calcMemorySum(part1Memory);
+	uint64_t part1Ans = calcMemorySum<false>(part1Memory);
 	
 	std::vector<MemoryWrite> part2Memory;
 	part2Memory.reserve(part2ReserveCount);
 	part2MemoryGlobal = &part2Memory;
-	for (const Write& write : part2Writes) {
-		writeAll(write, 0, 0);
+	for (size_t i = 0; i < part2Writes.size(); i++) {
+		setSolutionProgress(i * 50 / part2Writes.size());
+		writeAll(part2Writes[i], 0, 0);
 	}
+	
 	assert(part2Memory.size() <= part2ReserveCount);
-	uint64_t part2Ans = calcMemorySum(part2Memory);
+	uint64_t part2Ans = calcMemorySum<true>(part2Memory);
 	
 	snprintf(ans.ans1, sizeof(ans.ans1), "%lld", part1Ans);
 	snprintf(ans.ans2, sizeof(ans.ans2), "%lld", part2Ans);

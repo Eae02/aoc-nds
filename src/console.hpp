@@ -22,6 +22,8 @@ namespace console {
 	void runAllNoInteraction();
 	void runSolution(int day);
 	
+	void reset();
+	
 	void init();
 	void update();
 	

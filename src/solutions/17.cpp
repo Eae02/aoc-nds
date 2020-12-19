@@ -68,11 +68,15 @@ bool solveDay17(std::string_view input, AnswerBuffer& ans) {
 	}
 	int part1Ans = countActive();
 	
+	constexpr u32 NUM_W_STEPS = DEPTH * NUM_ITERATIONS - NUM_ITERATIONS * (NUM_ITERATIONS + 1);
+	u32 progress = 0;
+	
 	memcpy(state.data(), initialState.data(), stateSize);
 	memset(nextState.data(), 0, stateSize);
 	for (u32 iter = 0; iter < NUM_ITERATIONS; iter++) {
 		const u32 offset = NUM_ITERATIONS - iter;
 		for (u32 w = offset; w < DEPTH - offset; w++) {
+			setSolutionProgress((progress++) * 100 / NUM_W_STEPS);
 			for (u32 z = offset; z < DEPTH - offset; z++) {
 				for (u32 y = offset; y < height - offset; y++) {
 					for (u32 x = offset; x < width - offset; x++) {

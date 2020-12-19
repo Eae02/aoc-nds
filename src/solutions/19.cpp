@@ -54,8 +54,6 @@ struct DpTable {
 
 bool solveDay19(std::string_view input, AnswerBuffer& ans) {
 	Rule rules[MAX_RULES];
-	memset(rules, -1, sizeof(rules));
-	
 	char rulesFixedChar[MAX_RULES] = {};
 	
 	std::unique_ptr<DpTable> dp = std::make_unique<DpTable>();
@@ -105,16 +103,11 @@ bool solveDay19(std::string_view input, AnswerBuffer& ans) {
 		numBaseRules++;
 	}
 	
-	u32 part2FirstRule = 0;
-	while (rulesToposorted[part2FirstRule] != 8 && rulesToposorted[part2FirstRule] != 11) {
-		part2FirstRule++;
-	}
-	
 	assertRet(rules[0].sub1L == 8 && rules[0].sub1R == 11);
 	
 	memset(dp->data, -1, sizeof(dp->data));
 	for (u32 s = 0; s < stringsToTest.size(); s++) {
-		//setSolutionProgress(s * 100 / stringsToTest.size());
+		setSolutionProgress(s * 100 / stringsToTest.size());
 		
 		for (u32 b = 0; b < numBaseRules; b++) {
 			u32 rule = rulesToposorted[b];

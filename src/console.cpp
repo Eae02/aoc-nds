@@ -139,8 +139,6 @@ static inline void clearLineData() {
 	std::fill_n(allLineData[0], sizeof(allLineData) / 2, consoleMap[1000]);
 }
 
-static bool isRunningWoInteraction = false;
-static int noInteractionCurrentDay;
 static volatile int solutionProgress = -1;
 
 static constexpr size_t BYTES_FIRST_LINE = sizeof(u16) * 32 * 2;
@@ -151,7 +149,7 @@ void console::runAllNoInteraction() {
 	clearLineData();
 	dmaFillHalfWords(consoleMap[1000], (u16*)SCREEN_BASE_BLOCK(0), sizeof(allLineData));
 	
-	isRunningWoInteraction = true;
+	setSolutionProgress = [] (int) {};
 	
 	for (int d = 0; d < 25; d++) {
 		if (solutions[d] == nullptr)
@@ -162,11 +160,10 @@ void console::runAllNoInteraction() {
 		DC_FlushRange(allLineData, BYTES_FIRST_LINE);
 		dmaCopy(allLineData, (void*)SCREEN_BASE_BLOCK(0), BYTES_FIRST_LINE);
 		
-		noInteractionCurrentDay = d + 1;
 		runSolution(d);
 	}
 	
-	isRunningWoInteraction = false;
+	setSolutionProgress = console::setProgress;
 	
 	irqEnable(IRQ_VBLANK);
 	console::update();
@@ -176,14 +173,12 @@ void console::setProgress(int progress) {
 	if (progress == solutionProgress)
 		return;
 	solutionProgress = progress;
-	
-	if (isRunningWoInteraction) {
-		char msgBuffer[64];
-		snprintf(msgBuffer, sizeof(msgBuffer), "running on day %d (%d%%)...", noInteractionCurrentDay, progress);
-		setLineData(0, msgBuffer);
-		DC_FlushRange(allLineData, BYTES_FIRST_LINE);
-		dmaCopy(allLineData, (void*)SCREEN_BASE_BLOCK(0), BYTES_FIRST_LINE);
-	}
+}
+
+void console::reset() {
+	scrollY = 0;
+	dayToRun = -1;
+	std::fill_n(solStates, 25, SolutionState());
 }
 
 void console::runSolution(int day) {
