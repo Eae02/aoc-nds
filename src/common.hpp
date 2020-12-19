@@ -3,6 +3,7 @@
 #include <string_view>
 
 #define assert(x) if (!(x)) { fprintf(stderr, "error %s @%s:%d\n", #x, __FILE__, __LINE__); std::abort(); }
+#define assertRet(x) if (!(x)) { fprintf(stderr, "error %s @%s:%d\n", #x, __FILE__, __LINE__); return false; }
 
 std::string_view takeCharsUntil(std::string_view& str, std::string_view delim);
 

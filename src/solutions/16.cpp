@@ -20,7 +20,7 @@ static inline bool validForField(const Field& field, int value) {
 		(field.range2.first <= value && value <= field.range2.second);
 }
 
-constexpr size_t MAX_FIELDS = 20;
+constexpr size_t MAX_FIELDS = 30;
 
 static inline std::array<int, MAX_FIELDS> parseTicketLine(std::string_view line, int numFields) {
 	std::array<int, MAX_FIELDS> result;
@@ -66,7 +66,7 @@ bool solveDay16(std::string_view input, AnswerBuffer& ans) {
 			if (colPos == std::string_view::npos)
 				continue;
 			
-			assert(numFields < MAX_FIELDS);
+			assertRet(numFields < MAX_FIELDS);
 			fields[numFields].isDeparture = line.starts_with("departure");
 			
 			size_t orPos = line.find("or", colPos);
@@ -125,44 +125,39 @@ bool solveDay16(std::string_view input, AnswerBuffer& ans) {
 		}
 	}
 	
-	constexpr int MAX_FIELDS_BM = 1 << MAX_FIELDS;
-	std::vector<bool> dp(MAX_FIELDS_BM * (MAX_FIELDS + 1), false);
-	auto dpIdx = [&] (int l, int takenFields) { return (l << MAX_FIELDS) | takenFields; };
-	dp[dpIdx(numFields, (1 << numFields) - 1)] = true;
-	for (int l = numFields - 1; l >= 0; l--) {
-		console::setProgress((numFields - l - 1) * 100 / numFields);
-		for (int takenFields = 0; takenFields < MAX_FIELDS_BM; takenFields++) {
-			for (int nf = 0; nf < MAX_FIELDS; nf++) {
-				int nfMask = 1 << nf;
-				if (nfMask & takenFields)
-					continue;
-				if (!isValidFieldMapping[l][nf])
-					continue;
-				if (!dp[dpIdx(l + 1, nfMask | takenFields)])
-					continue;
-				
-				dp[dpIdx(l, takenFields)] = true;
+	int fieldMapping[MAX_FIELDS];
+	std::fill_n(fieldMapping, MAX_FIELDS, -1);
+	bool fieldIsMappedTo[MAX_FIELDS] = {};
+	
+	for (int i = 0; i < numFields; i++) {
+		bool anyMapped = false;
+		for (int t = 0; t < numFields; t++) {
+			if (fieldIsMappedTo[t]) continue;
+			
+			int numSources = 0;
+			int sourceField = 0;
+			for (int f = 0; f < numFields; f++) {
+				if (fieldMapping[f] == -1 && isValidFieldMapping[f][t]) {
+					numSources++;
+					sourceField = f;
+				}
+			}
+			
+			if (numSources == 1) {
+				fieldMapping[sourceField] = t;
+				fieldIsMappedTo[t] = true;
+				anyMapped = true;
 				break;
 			}
 		}
+		assertRet(anyMapped);
 	}
 	
 	int64_t part2Ans = 1;
-	int curTfBitmask = 0;
-	for (int l = 0; l < numFields; l++) {
-		bool ok = false;
-		for (int nf = 0; nf < numFields; nf++) {
-			int nextTfBitmask = curTfBitmask | (1 << nf);
-			if (nextTfBitmask != curTfBitmask && dp[dpIdx(l + 1, nextTfBitmask)]) {
-				curTfBitmask = nextTfBitmask;
-				ok = true;
-				if (fields[nf].isDeparture) {
-					part2Ans *= (int64_t)myTicketFields[nf];
-				}
-				break;
-			}
+	for (size_t i = 0; i < numFields; i++) {
+		if (fields[fieldMapping[i]].isDeparture) {
+			part2Ans *= myTicketFields[i];
 		}
-		assert(ok);
 	}
 	
 	snprintf(ans.ans1, sizeof(ans.ans1), "%d", part1Ans);

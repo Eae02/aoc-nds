@@ -14,11 +14,14 @@ void AnswerBuffer::answerWithInts(int part1, int part2) {
 #define XM_DAY(d) bool solveDay ## d(std::string_view input, AnswerBuffer& ans);
 #include "../solved_days_xm.inl"
 #undef XM_DAY
-Solution solutions[25] = {
-#define XM_DAY(d) &solveDay ## d,
+
+Solution solutions[25] = { };
+
+void initSolutions() {
+#define XM_DAY(d) solutions[d - 1] = &solveDay ## d;
 #include "../solved_days_xm.inl"
 #undef XM_DAY
-};
+}
 
 void testRunSolution(int day) {
 	if (solutions[day - 1] == nullptr) {
