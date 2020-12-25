@@ -24,6 +24,7 @@ void irqInterruptHandler() {
 void console::init() {
 	dayHasLongOutput[14] = true;
 	dayHasLongOutput[18] = true;
+	dayHasLongOutput[21] = true;
 	
 	videoSetMode(MODE_5_2D | DISPLAY_BG0_ACTIVE);
 	vramSetBankA(VRAM_A_MAIN_BG);
@@ -176,7 +177,6 @@ void console::setProgress(int progress) {
 }
 
 void console::reset() {
-	scrollY = 0;
 	dayToRun = -1;
 	std::fill_n(solStates, 25, SolutionState());
 }

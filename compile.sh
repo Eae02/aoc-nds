@@ -1,5 +1,11 @@
 #!/bin/bash
-rm -R obj/* 2> /dev/null
+
+if [[ $1 == "new" ]]; then
+	onlyNew=true
+else
+	rm -R obj/* 2> /dev/null
+fi
+
 set -e
 
 COMPILER="$DEVKITARM/bin/arm-none-eabi-g++"
@@ -21,15 +27,18 @@ if [[ -d "inp" ]]; then
 	done
 fi
 
-echo "compiling..."
 for f in $(find src -name "*.cpp"); do
 	mkdir -p obj/$(dirname $f)
-	$COMPILER $f $CFLAGS -c -o obj/$f.o &
+	outPath=obj/$f.o
+	if [[ "$f" -nt "$outPath" ]]; then
+		echo "compiling $f..."
+		$COMPILER $f $CFLAGS -c -o obj/$f.o &
+	fi
 done
 
 for f in $(find src/res -name "*.s"); do
 	mkdir -p obj/$(dirname $f)
-	$COMPILER -x assembler-with-cpp -g -mthumb -mthumb-interwork -c $f -o obj/$f.o
+	$COMPILER -x assembler-with-cpp -g -mthumb -mthumb-interwork -c $f -o obj/$f.o &
 done
 
 wait
