@@ -27,6 +27,8 @@ void initSolutions() {
 #undef XM_DAY
 }
 
+static int prevSolutionProgress = 0;
+
 void testRunSolution(int day) {
 	if (solutions[day - 1] == nullptr) {
 		fprintf(stderr, "no solution for day %d\n", day);
@@ -39,7 +41,13 @@ void testRunSolution(int day) {
 	}
 	AnswerBuffer ans;
 	
-	setSolutionProgress = [] (int progress) { fprintf(stderr, "solution progress: %d%%\n", progress); };
+	prevSolutionProgress = -1;
+	setSolutionProgress = [] (int progress) {
+		if (prevSolutionProgress != progress) {
+			prevSolutionProgress = progress;
+			fprintf(stderr, "solution progress: %d%%\n", progress);
+		}
+	};
 	cpuStartTiming(0);
 	bool ok = solutions[day - 1](input, ans);
 	u64 elapsedTicks = cpuEndTiming();

@@ -22,8 +22,6 @@ int main() {
 	initSolutions();
 	console::init();
 	
-	testRunSolution(22);
-	
 	int topScreenBg = bgInitSub(3, BgType_Bmp8, BgSize_B8_256x256, 0, 0);
 	
 	dmaCopy(bkgBitmap, bgGetGfxPtr(topScreenBg), 256 * 256);
