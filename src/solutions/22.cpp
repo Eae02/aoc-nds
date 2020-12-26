@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <nds/ndstypes.h>
 
-constexpr u32 MAX_DEPTH = 20;
 constexpr u32 MAX_CARDS = 64;
 
 struct CardsList {

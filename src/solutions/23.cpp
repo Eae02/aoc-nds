@@ -8,13 +8,6 @@
 #include <stdio.h>
 #include <nds/ndstypes.h>
 
-//A
-//A
-//A
-//B
-//B
-//B
-
 constexpr u32 MAX_NUM = 1000000;
 constexpr u32 ALLOC_BYTES = (MAX_NUM + 6) * 3;
 
