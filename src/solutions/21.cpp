@@ -110,7 +110,7 @@ bool solveDay21(std::string_view input, AnswerBuffer& ans) {
 	
 	std::sort(part2Vec.begin(), part2Vec.end());
 	size_t outPos = 0;
-	for (size_t i = 0; i < part2Vec.size(); i++) {
+	for (u32 i = 0; i < part2Vec.size(); i++) {
 		if (i != 0 && outPos < sizeof(ans.ans2) - 1) {
 			ans.ans2[outPos++] = ',';
 		}

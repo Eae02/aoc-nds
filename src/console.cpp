@@ -258,7 +258,16 @@ void console::update() {
 		}
 		setLineData(nextHalfLine, lineBuffer);
 		
-		if (dayHasLongOutput[d + 1]) {
+		int lineLenBP = strlen(part1Ans) + strlen(part2Ans) + 9;
+		
+		if (d + 1 == 21 && lineLenBP > 32) {
+			int charsPart2 = 32 - strlen(part1Ans) - 9;
+			snprintf(lineBuffer, sizeof(lineBuffer), " P1=\e%s\e, P2=\e%.*s\e", part1Ans, charsPart2, part2Ans);
+			setLineData(nextHalfLine + 2, lineBuffer);
+			snprintf(lineBuffer, sizeof(lineBuffer), "\e%s\e", part2Ans + charsPart2);
+			setLineData(nextHalfLine + 4, lineBuffer);
+			nextHalfLine += 7;
+		} else if (dayHasLongOutput[d + 1]) {
 			snprintf(lineBuffer, sizeof(lineBuffer), " P1=\e%s\e", part1Ans);
 			setLineData(nextHalfLine + 2, lineBuffer);
 			snprintf(lineBuffer, sizeof(lineBuffer), " P2=\e%s\e", part2Ans);
